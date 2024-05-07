@@ -1,6 +1,6 @@
-import "package:decla_time/home/left_side_bar/left_side_bar.dart";
-import "package:decla_time/home/main_view/main_view.dart";
 import "package:flutter/material.dart";
+import "package:think_simple/home/left_side_bar/left_side_bar.dart";
+import "package:think_simple/home/main_view/main_view.dart";
 
 class Home extends StatefulWidget {
   const Home({
@@ -12,7 +12,8 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  bool leftBarIsOpen = false;
+  bool leftBarIsVisible = false;
+  bool _leftBarIsOpen = false;
 
   @override
   Widget build(BuildContext context) {
@@ -20,13 +21,22 @@ class _HomeState extends State<Home> {
       body: Row(
         children: <Widget>[
           AnimatedContainer(
+            onEnd: () {
+              if (!leftBarIsVisible) {
+                setState(() {
+                  _leftBarIsOpen = false;
+                });
+              }
+            },
             duration: const Duration(milliseconds: 80),
-            width: leftBarIsOpen ? MediaQuery.sizeOf(context).width * 0.36 : 0,
-            child: const LeftSideBar(),
+            width:
+                leftBarIsVisible ? MediaQuery.sizeOf(context).width * 0.36 : 0,
+            child:
+                _leftBarIsOpen ? const LeftSideBar() : const SizedBox.shrink(),
           ),
           Expanded(
             child: MainView(
-              leftBarIsOpen: leftBarIsOpen,
+              leftBarIsOpen: leftBarIsVisible,
               setLeftBarIsOpen: setLeftBarIsOpen,
             ),
           ),
@@ -35,9 +45,12 @@ class _HomeState extends State<Home> {
     );
   }
 
-  void setLeftBarIsOpen(bool newState) {
+  void setLeftBarIsOpen(bool open) {
     setState(() {
-      leftBarIsOpen = newState;
+      leftBarIsVisible = open;
+      if (open) {
+        _leftBarIsOpen = true;
+      }
     });
   }
 }
