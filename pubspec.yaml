@@ -26,7 +26,7 @@ flutter:
   # assets:
 #    - "assets/images/"
 
-  fonts:
+  # fonts:
 #    - family: SourceSans
 #      fonts:
 #        - asset: fonts/SourceSans3-VariableFont_wght.ttf

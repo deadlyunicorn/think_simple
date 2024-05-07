@@ -1,5 +1,5 @@
-import "package:decla_time/core/constants/constants.dart";
 import "package:flutter/material.dart";
+import "package:think_simple/core/constants/constants.dart";
 
 class CustomAlertDialog extends StatelessWidget {
   const CustomAlertDialog({

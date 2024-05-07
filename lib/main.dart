@@ -1,8 +1,8 @@
-import "package:decla_time/core/functions/snackbars.dart";
-import "package:decla_time/core/widgets/column_with_spacings.dart";
-import "package:decla_time/home/home.dart";
 import "package:flutter/material.dart";
-import "package:flutter/widgets.dart";
+import "package:think_simple/home/home.dart";
+
+//TODO: Add possibility to backup the database to google drive.
+// Add a restore button as well. ( which adds to the already existing entries - doesn't remove the non existing ones)
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

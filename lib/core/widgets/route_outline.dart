@@ -1,5 +1,5 @@
-import "package:decla_time/core/extensions/capitalize.dart";
 import "package:flutter/material.dart";
+import "package:think_simple/core/extensions/capitalize.dart";
 
 class RouteOutline extends StatelessWidget {
   const RouteOutline({

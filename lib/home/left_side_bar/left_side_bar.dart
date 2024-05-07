@@ -1,6 +1,6 @@
-import "package:decla_time/core/functions/snackbars.dart";
-import "package:decla_time/core/widgets/column_with_spacings.dart";
 import "package:flutter/material.dart";
+import "package:think_simple/core/functions/snackbars.dart";
+import "package:think_simple/core/widgets/column_with_spacings.dart";
 
 class LeftSideBar extends StatelessWidget {
   const LeftSideBar({

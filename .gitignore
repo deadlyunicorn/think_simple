@@ -50,3 +50,4 @@ windows
 android
 ios
 .metadata
+pubspec.lock
