@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:think_simple/home/main_view/date_edited.dart";
+import "package:think_simple/home/main_view/main_view.dart";
 import "package:think_simple/home/main_view/top_bar/buttons/access_left_sidebar_button.dart";
 import "package:think_simple/home/main_view/top_bar/buttons/history_buttons.dart";
 
@@ -30,19 +31,24 @@ class TopBar extends StatelessWidget {
         }
       },
       offset: Offset(0, topBarIsVisible ? 0 : -1),
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(
+        milliseconds: MainView.topBarAnimationDurationInMilliseconds,
+      ),
+      curve: Curves.ease,
       child: !topBarIsOpen
           ? const SizedBox.shrink()
           : Container(
+              height: MainView.topBarHeight,
               decoration: BoxDecoration(
                 color:
                     Theme.of(context).colorScheme.background.withOpacity(0.8),
               ),
               //TODO Search for mask filter blur
               child: Padding(
-                padding: const EdgeInsets.all(32.0),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32.0, vertical: 8),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
@@ -50,14 +56,10 @@ class TopBar extends StatelessWidget {
                       setLeftBarIsOpen: setLeftBarIsOpen,
                       leftBarIsOpen: leftBarIsOpen,
                     ),
-                    Column(
-                      children: <Widget>[
-                        const HistoryButtons(),
-                        DateEdited(
-                          dateEdited: DateTime.now(),
-                        ),
-                      ],
+                    DateEdited(
+                      dateEdited: DateTime.now(),
                     ),
+                    const HistoryButtons(),
                   ],
                 ),
               ),
