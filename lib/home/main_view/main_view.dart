@@ -10,12 +10,33 @@ class MainView extends StatefulWidget {
 
   final bool leftBarIsOpen;
   final void Function(bool) setLeftBarIsOpen;
+  static const int topBarAnimationDurationInMilliseconds = 800;
+  static const double topBarHeight = 64;
 
   @override
   State<MainView> createState() => _MainViewState();
 }
 
 class _MainViewState extends State<MainView> {
+  @override
+  void initState() {
+    super.initState();
+    scrollController.addListener(() {
+      final double offsetBeforeTimeout = scrollController.offset;
+
+      if ((previousScrollOffset - offsetBeforeTimeout) < -10) {
+        setTopBarIsVisible(false);
+      } else if (previousScrollOffset - offsetBeforeTimeout > 10) {
+        setTopBarIsVisible(true);
+      }
+      setState(() {
+        previousScrollOffset = scrollController.offset;
+      });
+    });
+  }
+
+  final ScrollController scrollController = ScrollController();
+  double previousScrollOffset = 0;
   bool topBarIsVisible = true;
   bool topBarIsOpen = true;
 
@@ -52,40 +73,28 @@ class _MainViewState extends State<MainView> {
       children: <Widget>[
         Positioned.fill(
           child: SingleChildScrollView(
+            controller: scrollController,
             child: Padding(
               padding: const EdgeInsets.all(32.0),
               child: Column(
                 children: <Widget>[
                   AnimatedContainer(
+                    curve: Curves.ease,
                     //? Prevents obscuring text when showing the top bar.
-                    duration: const Duration(milliseconds: 300),
-                    height: topBarIsVisible ? 160 : 0,
+                    duration: const Duration(
+                      milliseconds:
+                          MainView.topBarAnimationDurationInMilliseconds,
+                    ),
+                    height: topBarIsVisible &&
+                            previousScrollOffset < MainView.topBarHeight
+                        ? MainView.topBarHeight
+                        : 0,
                   ),
                   TextButton(
                       onPressed: () {
                         setTopBarIsVisible(!topBarIsVisible);
                       },
                       child: Text("toggle top bar")),
-                  Container(
-                    color: Colors.red,
-                    height: 400,
-                    width: 40,
-                  ),
-                  Container(
-                    color: Colors.red,
-                    height: 400,
-                    width: 40,
-                  ),
-                  Container(
-                    color: Colors.red,
-                    height: 400,
-                    width: 40,
-                  ),
-                  Container(
-                    color: Colors.red,
-                    height: 400,
-                    width: 40,
-                  ),
                 ],
               ),
             ),
