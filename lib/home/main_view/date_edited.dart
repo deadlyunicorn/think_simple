@@ -13,7 +13,9 @@ class DateEdited extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       dateEdited.formatted.replaceFirst(" ", "\n"),
-      style: Theme.of(context).textTheme.bodySmall,
+      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Theme.of(context).colorScheme.onBackground.withOpacity(0.64),
+          ),
       textAlign: TextAlign.center,
     );
   }
