@@ -174,6 +174,7 @@ class MyApp extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
       ),
     ),
+    cardColor: _secondary, //* This affects the textfield toolbar
     useMaterial3: true,
   );
 }

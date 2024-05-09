@@ -1,3 +1,5 @@
+import "dart:ui";
+
 import "package:flutter/material.dart";
 import "package:think_simple/home/main_view/date_edited.dart";
 import "package:think_simple/home/main_view/main_view.dart";
@@ -40,32 +42,44 @@ class TopBar extends StatelessWidget {
       curve: Curves.ease,
       child: !topBarIsOpen
           ? const SizedBox.shrink()
-          : Container(
-              height: MainView.topBarHeight,
-              decoration: BoxDecoration(
-                color:
-                    Theme.of(context).colorScheme.background.withOpacity(0.8),
-              ),
-              //TODO Search for mask filter blur
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 32.0, vertical: 8),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    AccessLeftSidebarButton(
-                      setLeftBarIsOpen: setLeftBarIsOpen,
-                      leftBarIsOpen: leftBarIsOpen,
+          : ClipRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(
+                  sigmaX: 4,
+                  sigmaY: 4,
+                ),
+                child: Container(
+                  height: MainView.topBarHeight,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .background
+                        .withOpacity(0.8),
+                  ),
+                  //TODO Search for mask filter blur
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32.0,
+                      vertical: 8,
                     ),
-                    DateEdited(
-                      dateEdited: DateTime.now(),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.max,
+                      children: <Widget>[
+                        AccessLeftSidebarButton(
+                          setLeftBarIsOpen: setLeftBarIsOpen,
+                          leftBarIsOpen: leftBarIsOpen,
+                        ),
+                        DateEdited(
+                          dateEdited: DateTime.now(),
+                        ),
+                        HistoryButtons(
+                          historyController: historyController,
+                        ),
+                      ],
                     ),
-                    HistoryButtons(
-                      historyController: historyController,
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
