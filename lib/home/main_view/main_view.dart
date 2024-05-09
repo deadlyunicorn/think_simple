@@ -5,11 +5,15 @@ class MainView extends StatefulWidget {
   const MainView({
     required this.leftBarIsOpen,
     required this.setLeftBarIsOpen,
+    required this.textEditingController,
     super.key,
   });
 
   final bool leftBarIsOpen;
   final void Function(bool) setLeftBarIsOpen;
+
+  final TextEditingController textEditingController;
+
   static const int topBarAnimationDurationInMilliseconds = 800;
   static const double topBarHeight = 64;
 
@@ -37,6 +41,7 @@ class _MainViewState extends State<MainView> {
 
   final ScrollController scrollController = ScrollController();
   final UndoHistoryController historyController = UndoHistoryController();
+
   double previousScrollOffset = 0;
   bool topBarIsVisible = true;
   bool topBarIsOpen = true;
@@ -88,6 +93,7 @@ class _MainViewState extends State<MainView> {
                         : 0,
                   ),
                   TextField(
+                    controller: widget.textEditingController,
                     undoController: historyController,
                     minLines: 32,
                     autofocus: true,
