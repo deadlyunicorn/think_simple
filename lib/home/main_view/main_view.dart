@@ -36,15 +36,12 @@ class _MainViewState extends State<MainView> {
   }
 
   final ScrollController scrollController = ScrollController();
+  final UndoHistoryController historyController = UndoHistoryController();
   double previousScrollOffset = 0;
   bool topBarIsVisible = true;
   bool topBarIsOpen = true;
 
   void setTopBarIsVisible(bool isVisible) {
-    //TODO make it so that it hides automatically on scroll, and it appears after 3s
-    //TODO make sure it doesn't hide by mistake bcz it hides the side bar as well
-    //TODO a possible way to do this is to hide it only if scroll dy is more than x
-
     if (isVisible != topBarIsVisible) {
       setState(() {
         topBarIsVisible = isVisible;
@@ -65,8 +62,8 @@ class _MainViewState extends State<MainView> {
     }
   }
 
-  //? show top bar if not scrolling for like 2 seconds.
-
+  //TODO: create a function that checks for how many different characters the text has
+  //TODO compared to the previous snapshot. If it has more than 20 characters then create a new snapshot
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -90,11 +87,13 @@ class _MainViewState extends State<MainView> {
                         ? MainView.topBarHeight
                         : 0,
                   ),
-                  TextButton(
-                      onPressed: () {
-                        setTopBarIsVisible(!topBarIsVisible);
-                      },
-                      child: Text("toggle top bar")),
+                  TextField(
+                    undoController: historyController,
+                    minLines: 32,
+                    autofocus: true,
+                    maxLines: null,
+                    decoration: const InputDecoration(border: InputBorder.none),
+                  ),
                 ],
               ),
             ),
@@ -110,6 +109,7 @@ class _MainViewState extends State<MainView> {
             topBarIsVisible: topBarIsVisible,
             topBarIsOpen: topBarIsOpen,
             setTopBarIsOpen: setTopBarIsOpen,
+            historyController: historyController,
           ),
         ),
       ],

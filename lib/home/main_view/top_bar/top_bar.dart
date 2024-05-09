@@ -11,8 +11,11 @@ class TopBar extends StatelessWidget {
     required this.leftBarIsOpen,
     required this.setTopBarIsOpen,
     required this.topBarIsOpen,
+    required this.historyController,
     super.key,
   });
+
+  final UndoHistoryController historyController;
 
   final bool leftBarIsOpen;
   final void Function(bool) setLeftBarIsOpen;
@@ -59,7 +62,9 @@ class TopBar extends StatelessWidget {
                     DateEdited(
                       dateEdited: DateTime.now(),
                     ),
-                    const HistoryButtons(),
+                    HistoryButtons(
+                      historyController: historyController,
+                    ),
                   ],
                 ),
               ),

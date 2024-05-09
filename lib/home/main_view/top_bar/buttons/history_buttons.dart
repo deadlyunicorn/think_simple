@@ -1,29 +1,53 @@
 import "package:flutter/material.dart";
 
-class HistoryButtons extends StatelessWidget {
+class HistoryButtons extends StatefulWidget {
   const HistoryButtons({
+    required this.historyController,
     super.key,
   });
 
-  final bool canUndo = false;
-  final bool canRedo = false;
+  final UndoHistoryController historyController;
 
-  //TODO Keep redo history until you overwrite.
+  @override
+  State<HistoryButtons> createState() => _HistoryButtonsState();
+}
 
-  //TODO make it like max history: 30 and make it like FIFO (First in First out)
+class _HistoryButtonsState extends State<HistoryButtons> {
+  @override
+  void initState() {
+    super.initState();
+
+    widget.historyController.addListener(() {
+      setState(() {
+        canUndo = widget.historyController.value.canUndo;
+        canRedo = widget.historyController.value.canRedo;
+      });
+    });
+  }
+
+  bool canUndo = false;
+  bool canRedo = false;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: <Widget>[
         IconButton(
-          onPressed: canUndo ? () {} : null,
+          onPressed: canUndo
+              ? () {
+                  widget.historyController.undo();
+                }
+              : null,
           icon: const Icon(
             Icons.undo,
           ),
         ),
         IconButton(
-          onPressed: canRedo ? () {} : null,
+          onPressed: canRedo
+              ? () {
+                  widget.historyController.redo();
+                }
+              : null,
           icon: const Icon(
             Icons.redo,
           ),
