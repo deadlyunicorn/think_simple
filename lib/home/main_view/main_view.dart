@@ -93,6 +93,9 @@ class _MainViewState extends State<MainView> {
                         : 0,
                   ),
                   TextField(
+                    onTap: () {
+                      widget.setLeftBarIsOpen(false);
+                    },
                     controller: widget.textEditingController,
                     undoController: historyController,
                     minLines: 32,
