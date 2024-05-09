@@ -1,31 +1,53 @@
+import "dart:io";
+
 import "package:flutter/material.dart";
+import "package:isar/isar.dart";
+import "package:path_provider/path_provider.dart";
+import "package:provider/provider.dart";
+import "package:think_simple/core/database/database_items.dart";
+import "package:think_simple/core/database/isar_notifier.dart";
 import "package:think_simple/home/home.dart";
 
 //TODO: Add possibility to backup the database to google drive.
 // Add a restore button as well. ( which adds to the already existing entries - doesn't remove the non existing ones)
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  runApp(
-    MyApp(),
+  final IsarNotifier isarNotifier = IsarNotifier(
+    isarFuture: getApplicationDocumentsDirectory().then(
+      (Directory workingDirectory) async => await Isar.open(
+        <CollectionSchema<Object>>[DatabasePageSchema, NoteSchema],
+        directory: "${workingDirectory.path}/think_simple/data",
+      ),
+    ),
   );
 
-  //TODO load database before launch.
+  runApp(
+    MyApp(
+      isarNotifer: isarNotifier,
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   MyApp({
+    required this.isarNotifer,
     super.key,
   });
 
+  final IsarNotifier isarNotifer;
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "think_simple",
-      theme: darkTheme,
-      home: const Home(),
-      locale: const Locale("en"),
+    return ChangeNotifierProvider<IsarNotifier>(
+      create: (BuildContext context) => isarNotifer,
+      child: MaterialApp(
+        title: "think_simple",
+        theme: darkTheme,
+        home: const Home(),
+        locale: const Locale("en"),
+      ),
     );
   }
 
