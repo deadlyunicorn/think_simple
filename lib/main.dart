@@ -23,6 +23,8 @@ void main() {
     ),
   );
 
+  //TODO: get the last viewed page.
+
   runApp(
     MyApp(
       isarNotifer: isarNotifier,

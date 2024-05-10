@@ -51,3 +51,4 @@ android
 ios
 .metadata
 pubspec.lock
+lib/core/database/database_items.g.dart
