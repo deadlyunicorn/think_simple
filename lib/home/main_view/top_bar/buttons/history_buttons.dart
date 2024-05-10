@@ -1,41 +1,22 @@
 import "package:flutter/material.dart";
+import "package:provider/provider.dart";
+import "package:think_simple/home/main_view/history_notifier.dart";
 
-class HistoryButtons extends StatefulWidget {
+class HistoryButtons extends StatelessWidget {
   const HistoryButtons({
-    required this.historyController,
     super.key,
   });
 
-  final UndoHistoryController historyController;
-
-  @override
-  State<HistoryButtons> createState() => _HistoryButtonsState();
-}
-
-class _HistoryButtonsState extends State<HistoryButtons> {
-  @override
-  void initState() {
-    super.initState();
-
-    widget.historyController.addListener(() {
-      setState(() {
-        canUndo = widget.historyController.value.canUndo;
-        canRedo = widget.historyController.value.canRedo;
-      });
-    });
-  }
-
-  bool canUndo = false;
-  bool canRedo = false;
-
   @override
   Widget build(BuildContext context) {
+    final HistoryNotifier historyController = context.watch<HistoryNotifier>();
+
     return Row(
       children: <Widget>[
         IconButton(
-          onPressed: canUndo
+          onPressed: historyController.canUndo
               ? () {
-                  widget.historyController.undo();
+                  historyController.undo();
                 }
               : null,
           icon: const Icon(
@@ -43,9 +24,9 @@ class _HistoryButtonsState extends State<HistoryButtons> {
           ),
         ),
         IconButton(
-          onPressed: canRedo
+          onPressed: historyController.canRedo
               ? () {
-                  widget.historyController.redo();
+                  historyController.redo();
                 }
               : null,
           icon: const Icon(

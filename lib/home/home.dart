@@ -1,5 +1,7 @@
 import "package:flutter/material.dart";
+import "package:provider/provider.dart";
 import "package:think_simple/home/left_side_bar/left_side_bar.dart";
+import "package:think_simple/home/main_view/history_notifier.dart";
 import "package:think_simple/home/main_view/history_tracker.dart";
 import "package:think_simple/home/main_view/main_view.dart";
 
@@ -39,12 +41,19 @@ class _HomeState extends State<Home> {
                   : const SizedBox.shrink(),
             ),
             Expanded(
-              child: HistoryTracker(
-                child: (TextEditingController textEditingController) =>
-                    MainView(
-                  textEditingController: textEditingController,
-                  leftBarIsOpen: leftBarIsVisible,
-                  setLeftBarIsOpen: setLeftBarIsOpen,
+              child: ChangeNotifierProvider<HistoryNotifier>(
+                create: (BuildContext context) => HistoryNotifier(),
+                builder: (BuildContext context, Widget? child) =>
+                    HistoryTracker(
+                  historyController: context.watch<HistoryNotifier>(),
+                  child: (
+                    TextEditingController textEditingController,
+                  ) =>
+                      MainView(
+                    textEditingController: textEditingController,
+                    leftBarIsOpen: leftBarIsVisible,
+                    setLeftBarIsOpen: setLeftBarIsOpen,
+                  ),
                 ),
               ),
             ),

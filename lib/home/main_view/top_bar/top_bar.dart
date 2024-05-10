@@ -1,9 +1,9 @@
 import "dart:ui";
 
 import "package:flutter/material.dart";
-import "package:think_simple/home/main_view/date_edited.dart";
 import "package:think_simple/home/main_view/main_view.dart";
 import "package:think_simple/home/main_view/top_bar/buttons/access_left_sidebar_button.dart";
+import "package:think_simple/home/main_view/top_bar/buttons/date_edited.dart";
 import "package:think_simple/home/main_view/top_bar/buttons/history_buttons.dart";
 
 class TopBar extends StatelessWidget {
@@ -13,11 +13,8 @@ class TopBar extends StatelessWidget {
     required this.leftBarIsOpen,
     required this.setTopBarIsOpen,
     required this.topBarIsOpen,
-    required this.historyController,
     super.key,
   });
-
-  final UndoHistoryController historyController;
 
   final bool leftBarIsOpen;
   final void Function(bool) setLeftBarIsOpen;
@@ -74,9 +71,7 @@ class TopBar extends StatelessWidget {
                         DateEdited(
                           dateEdited: DateTime.now(),
                         ),
-                        HistoryButtons(
-                          historyController: historyController,
-                        ),
+                        const HistoryButtons(),
                       ],
                     ),
                   ),

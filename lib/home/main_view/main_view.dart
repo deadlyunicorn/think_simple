@@ -40,7 +40,6 @@ class _MainViewState extends State<MainView> {
   }
 
   final ScrollController scrollController = ScrollController();
-  final UndoHistoryController historyController = UndoHistoryController();
 
   double previousScrollOffset = 0;
   bool topBarIsVisible = true;
@@ -97,7 +96,6 @@ class _MainViewState extends State<MainView> {
                       widget.setLeftBarIsOpen(false);
                     },
                     controller: widget.textEditingController,
-                    undoController: historyController,
                     minLines: 32,
                     autofocus: true,
                     maxLines: null,
@@ -118,7 +116,6 @@ class _MainViewState extends State<MainView> {
             topBarIsVisible: topBarIsVisible,
             topBarIsOpen: topBarIsOpen,
             setTopBarIsOpen: setTopBarIsOpen,
-            historyController: historyController,
           ),
         ),
       ],
