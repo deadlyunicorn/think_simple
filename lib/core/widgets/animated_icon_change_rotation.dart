@@ -6,11 +6,13 @@ class AnimatedIconChangeScale extends StatelessWidget {
     required this.firstIcon,
     required this.secondIcon,
     super.key,
+    this.duration = const Duration(milliseconds: 360),
   });
 
   final bool displayFirst;
-  final Icon firstIcon;
-  final Icon secondIcon;
+  final Widget firstIcon;
+  final Widget secondIcon;
+  final Duration duration;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +22,7 @@ class AnimatedIconChangeScale extends StatelessWidget {
         scale: animation,
         child: child,
       ),
-      duration: const Duration(milliseconds: 80),
+      duration: duration,
       //!!! NOTE: this won't work if the passed Icon()s
       //!!! ----- don't have a key ( e.g. ValueKey )
       child: displayFirst ? firstIcon : secondIcon,
