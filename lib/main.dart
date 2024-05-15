@@ -7,11 +7,12 @@ import "package:provider/provider.dart";
 import "package:think_simple/core/database/database_items.dart";
 import "package:think_simple/core/database/isar_notifier.dart";
 import "package:think_simple/home/home.dart";
+import "package:think_simple/home/selected_note_notifier.dart";
 
 //TODO: Add possibility to backup the database to google drive.
-// Add a restore button as well. ( which adds to the already existing entries - doesn't remove the non existing ones)
+//? Add a restore button as well. ( which adds to the already existing entries - doesn't remove the non existing ones)
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final IsarNotifier isarNotifier = IsarNotifier(
@@ -23,10 +24,28 @@ void main() {
     ),
   );
 
-  //TODO: get the last viewed page.
+  final SelectedNoteNotifer selectedNoteNotifer =
+      await (await isarNotifier.isarFuture)
+          .notes
+          .where()
+          .sortByModifiedDateDesc()
+          .findFirst()
+          .then((Note? value) async {
+    Note? note = value;
+    if (note == null) {
+      final Note newNote = Note(textContent: "", modifiedDate: DateTime.now());
+      final Id noteId =
+          await (await isarNotifier.isarFuture).notes.put(newNote);
+      note = newNote.copyWith(id: noteId);
+    }
+    return note;
+  }).then(
+    (Note note) => SelectedNoteNotifer(selectedNote: note),
+  );
 
   runApp(
     MyApp(
+      selectedNoteNotifer: selectedNoteNotifer,
       isarNotifer: isarNotifier,
     ),
   );
@@ -35,15 +54,25 @@ void main() {
 class MyApp extends StatelessWidget {
   MyApp({
     required this.isarNotifer,
+    required this.selectedNoteNotifer,
     super.key,
   });
 
   final IsarNotifier isarNotifer;
+  final SelectedNoteNotifer selectedNoteNotifer;
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<IsarNotifier>(
-      create: (BuildContext context) => isarNotifer,
+    return MultiProvider(
+      // ignore: always_specify_types
+      providers: [
+        ChangeNotifierProvider<IsarNotifier>(
+          create: (BuildContext context) => isarNotifer,
+        ),
+        ChangeNotifierProvider<SelectedNoteNotifer>(
+          create: (BuildContext context) => selectedNoteNotifer,
+        ),
+      ],
       child: MaterialApp(
         title: "think_simple",
         theme: darkTheme,
