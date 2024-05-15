@@ -1,10 +1,12 @@
 import "dart:ui";
 
 import "package:flutter/material.dart";
+import "package:provider/provider.dart";
 import "package:think_simple/home/main_view/main_view.dart";
 import "package:think_simple/home/main_view/top_bar/buttons/access_left_sidebar_button.dart";
 import "package:think_simple/home/main_view/top_bar/buttons/date_edited.dart";
 import "package:think_simple/home/main_view/top_bar/buttons/history_buttons.dart";
+import "package:think_simple/home/selected_note_notifier.dart";
 
 class TopBar extends StatelessWidget {
   const TopBar({
@@ -69,7 +71,10 @@ class TopBar extends StatelessWidget {
                           leftBarIsOpen: leftBarIsOpen,
                         ),
                         DateEdited(
-                          dateEdited: DateTime.now(),
+                          dateEdited: context
+                              .watch<SelectedNoteNotifer>()
+                              .selectedNote
+                              .modifiedDate,
                         ),
                         const HistoryButtons(),
                       ],
