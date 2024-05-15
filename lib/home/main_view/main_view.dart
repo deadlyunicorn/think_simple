@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:think_simple/core/widgets/animated_icon_change_rotation.dart";
+import "package:think_simple/home/main_view/create_new_note_button.dart";
 import "package:think_simple/home/main_view/top_bar/top_bar.dart";
 
 class MainView extends StatefulWidget {
@@ -155,6 +156,14 @@ class _MainViewState extends State<MainView> {
               ),
             ),
             secondIcon: const SizedBox.shrink(),
+          ),
+        ),
+        Positioned(
+          right: 16,
+          bottom: 16,
+          child: CreateNewNoteButton(
+            leftBarIsOpen: widget.leftBarIsOpen,
+            setLeftBarIsOpen: widget.setLeftBarIsOpen,
           ),
         ),
       ],
