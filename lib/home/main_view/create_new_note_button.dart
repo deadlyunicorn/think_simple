@@ -25,26 +25,30 @@ class CreateNewNoteButton extends StatelessWidget {
         child: const Icon(Icons.add),
         onPressed: () async {
           final Isar isar = await context.read<IsarNotifier>().isarFuture;
-          final Note newNote =
-              Note(textContent: "", modifiedDate: DateTime.now());
+          final Note newNote = Note(
+            textContent: "",
+            modifiedDate: DateTime.now(),
+          );
 
           if (context.mounted) {
             await context.read<IsarNotifier>().runWriteOperation(
               writeOperation: () async {
-                await isar.writeTxn(() async {
-                  final Id noteId = await isar.notes.put(newNote);
-                  await isar.databasePages.put(
-                    DatabasePage(
-                      autoSnapshots: <int>[noteId],
-                      manualSnapshots: <int>[],
-                    ),
-                  );
-                  if (context.mounted) {
-                    context.read<SelectedNoteNotifer>().updateNote(
-                          newNote.copyWith(id: noteId),
-                        );
-                  }
-                });
+                await isar.writeTxn(
+                  () async {
+                    final Id noteId = await isar.notes.put(newNote);
+                    await isar.databasePages.put(
+                      DatabasePage(
+                        autoSnapshots: <int>[noteId],
+                        manualSnapshots: <int>[],
+                      ),
+                    );
+                    if (context.mounted) {
+                      context.read<SelectedNoteNotifer>().updateNote(
+                            newNote.copyWith(id: noteId),
+                          );
+                    }
+                  },
+                );
               },
             );
           }
