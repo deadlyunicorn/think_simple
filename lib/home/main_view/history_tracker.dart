@@ -1,11 +1,13 @@
 import "package:flutter/material.dart";
 import "package:think_simple/core/extensions/string_difference_comparison.dart";
 import "package:think_simple/home/main_view/history_notifier.dart";
+import "package:think_simple/home/selected_note_notifier.dart";
 
 class HistoryTracker extends StatefulWidget {
   const HistoryTracker({
     required this.child,
     required this.historyController,
+    required this.selectedNoteNotifer,
     super.key,
   });
 
@@ -14,6 +16,7 @@ class HistoryTracker extends StatefulWidget {
   ) child;
 
   final HistoryNotifier historyController;
+  final SelectedNoteNotifer selectedNoteNotifer;
 
   @override
   State<HistoryTracker> createState() => _HistoryTrackerState();
@@ -26,6 +29,15 @@ class _HistoryTrackerState extends State<HistoryTracker> {
   void initState() {
     super.initState();
 
+    textEditingController.text =
+        widget.selectedNoteNotifer.selectedNote.textContent;
+
+    widget.selectedNoteNotifer.addListener(() {
+      textEditingController.text =
+          widget.selectedNoteNotifer.selectedNote.textContent;
+      print("Added new note");
+    });
+
     widget.historyController.addListener(() {
       //TODO Unfinished ( haven't given it a look. It is in a working state 11-05-2024 )
       final String? currentTextOnHistoryStack =
@@ -35,6 +47,8 @@ class _HistoryTrackerState extends State<HistoryTracker> {
         textEditingController.text = currentTextOnHistoryStack;
       }
     });
+
+    //TODO disable normal CTRL + Z? and trigger our own Undos.
     textEditingController.addListener(() {
       final String textOnTrigger = textEditingController.text;
 
