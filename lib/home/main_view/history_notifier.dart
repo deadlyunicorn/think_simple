@@ -1,20 +1,28 @@
 import "package:flutter/material.dart";
+import "package:think_simple/core/database/database_items.dart";
 
 class HistoryNotifier extends ChangeNotifier {
-  final List<String> historyStack = <String>[""];
-  int currentIndex = 0;
+  List<Note> _historyStack;
+  List<Note> get historyStack => _historyStack;
+  int _currentIndex = 0;
+  int get currentIndex => _currentIndex;
 
-  String? get currentTextContent =>
-      currentIndex < historyStack.length ? historyStack[currentIndex] : null;
+  HistoryNotifier({
+    required List<Note> historyStack,
+  }) : _historyStack = historyStack;
+
+  String? get currentTextContent => _currentIndex < _historyStack.length
+      ? _historyStack[_currentIndex].textContent
+      : null;
 
   bool get canUndo =>
-      currentIndex + 1 < historyStack.length && historyStack.isNotEmpty;
+      _currentIndex + 1 < _historyStack.length && _historyStack.isNotEmpty;
 
-  bool get canRedo => currentIndex > 0;
+  bool get canRedo => _currentIndex > 0;
 
   void undo() {
-    if (currentIndex + 1 < historyStack.length) {
-      currentIndex++;
+    if (_currentIndex + 1 < _historyStack.length) {
+      _currentIndex++;
     }
     //   });
     //     if (textEditingController.text != currentTextContent) {
@@ -26,8 +34,8 @@ class HistoryNotifier extends ChangeNotifier {
   }
 
   void redo() {
-    if (currentIndex > 0) {
-      currentIndex--;
+    if (_currentIndex > 0) {
+      _currentIndex--;
     }
     notifyListeners();
     //  if (textEditingController.text != currentTextContent) {
@@ -37,15 +45,25 @@ class HistoryNotifier extends ChangeNotifier {
     //     }
   }
 
-  void addToHistoryStack(String newEntry) {
-    if (newEntry != currentTextContent) {
-      currentIndex = 0;
-      if (historyStack.length == 10) {
-        historyStack.removeLast();
+  void addToHistoryStack(Note newEntry) {
+    //TODO: add Isar support ( add note to the current page.)
+    if (newEntry.textContent != currentTextContent) {
+      _currentIndex = 0;
+      if (_historyStack.length == 10) {
+        _historyStack.removeLast();
       }
-      historyStack.insert(0, newEntry);
+      _historyStack.insert(0, newEntry);
     }
 
+    notifyListeners();
+  }
+
+  void handleNewPageSelect({
+    required List<Note> historyStack,
+  }) {
+    _historyStack = historyStack;
+    print(historyStack);
+    _currentIndex = 0;
     notifyListeners();
   }
 }
