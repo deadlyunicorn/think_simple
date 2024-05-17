@@ -1,13 +1,18 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
+import "package:think_simple/core/database/database_items.dart";
+import "package:think_simple/core/database/isar_notifier.dart";
 import "package:think_simple/core/extensions/string_difference_comparison.dart";
 import "package:think_simple/home/main_view/history_notifier.dart";
-import "package:think_simple/home/selected_note_notifier.dart";
 
 class HistoryTracker extends StatefulWidget {
+  //TODO history tracker gets the notes with the same pageId
+
   const HistoryTracker({
     required this.child,
     required this.historyController,
-    required this.selectedNoteNotifer,
+    required this.isarNotifier,
     super.key,
   });
 
@@ -16,7 +21,29 @@ class HistoryTracker extends StatefulWidget {
   ) child;
 
   final HistoryNotifier historyController;
-  final SelectedNoteNotifer selectedNoteNotifer;
+  final IsarNotifier isarNotifier;
+
+  static Future<void> saveSnapshot({
+    required Note note,
+    required HistoryNotifier historyController,
+    required IsarNotifier isarNotifier,
+  }) async {
+    if (historyController.historyStack.firstOrNull?.textContent !=
+        note.textContent) {
+      historyController.addToHistoryStack(
+        Note(
+          textContent: note.textContent,
+          modifiedDate: DateTime.now(),
+          wasAutoSaved: true,
+          pageId: note.pageId,
+        ),
+      );
+      await isarNotifier.createSnapshot(
+        textContent: note.textContent,
+        wasAutoSaved: true,
+      );
+    }
+  }
 
   @override
   State<HistoryTracker> createState() => _HistoryTrackerState();
@@ -29,27 +56,29 @@ class _HistoryTrackerState extends State<HistoryTracker> {
   void initState() {
     super.initState();
 
-    textEditingController.text =
-        widget.selectedNoteNotifer.selectedNote.textContent;
+    textEditingController.text = widget.isarNotifier.currentNote.textContent;
 
-    widget.selectedNoteNotifer.addListener(() {
-      textEditingController.text =
-          widget.selectedNoteNotifer.selectedNote.textContent;
-      print("Added new note");
-    });
+    // widget.isarNotifier.addListener(() async {
+    //   // textEditingController.text = widget.isarNotifier.currentNote.textContent;
+
+    //   print("Added new note");
+    // });
 
     widget.historyController.addListener(() {
+      //!! Only triggers if canUndo or canRedo changes
+      //!! NOT when there is a new history entry.
       //TODO Unfinished ( haven't given it a look. It is in a working state 11-05-2024 )
       final String? currentTextOnHistoryStack =
           widget.historyController.currentTextContent;
-      if (currentTextOnHistoryStack != textEditingController.text &&
-          currentTextOnHistoryStack != null) {
+      if (currentTextOnHistoryStack == null) {
+        textEditingController.text = "";
+      } else if (currentTextOnHistoryStack != textEditingController.text) {
         textEditingController.text = currentTextOnHistoryStack;
       }
     });
 
     //TODO disable normal CTRL + Z? and trigger our own Undos.
-    textEditingController.addListener(() {
+    textEditingController.addListener(() async {
       final String textOnTrigger = textEditingController.text;
 
       // if (currentIndex != 0 && textOnTrigger != currentTextContent) {
@@ -62,14 +91,28 @@ class _HistoryTrackerState extends State<HistoryTracker> {
       if (textOnTrigger.isNoticablyDifferentThan(
         widget.historyController.currentTextContent ?? "",
       )) {
-        widget.historyController.addToHistoryStack(textEditingController.text);
+        await HistoryTracker.saveSnapshot(
+          isarNotifier: widget.isarNotifier,
+          historyController: widget.historyController,
+          note: widget.isarNotifier.currentNote.copyWith(
+            textContent: textEditingController.text,
+          ),
+        );
       }
 
-      Future<void>.delayed(const Duration(seconds: 3)).then((_) {
-        if (textOnTrigger == textEditingController.text) {
-          widget.historyController.addToHistoryStack(textOnTrigger);
-        }
-      });
+      await Future<void>.delayed(const Duration(seconds: 3)).then(
+        (_) async {
+          if (textOnTrigger == textEditingController.text) {
+            await HistoryTracker.saveSnapshot(
+              isarNotifier: widget.isarNotifier,
+              historyController: widget.historyController,
+              note: widget.isarNotifier.currentNote.copyWith(
+                textContent: textOnTrigger,
+              ),
+            );
+          }
+        },
+      );
 
       // });
 
@@ -110,3 +153,5 @@ class _HistoryTrackerState extends State<HistoryTracker> {
     return widget.child(textEditingController);
   }
 }
+
+//TODO !!! UNFIN
