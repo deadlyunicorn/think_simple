@@ -162,6 +162,7 @@ class _MainViewState extends State<MainView> {
           right: 16,
           bottom: 16,
           child: CreateNewNoteButton(
+            textEditingController: widget.textEditingController,
             leftBarIsOpen: widget.leftBarIsOpen,
             setLeftBarIsOpen: widget.setLeftBarIsOpen,
           ),
