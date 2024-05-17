@@ -7,7 +7,7 @@ import "package:provider/provider.dart";
 import "package:think_simple/core/database/database_items.dart";
 import "package:think_simple/core/database/isar_notifier.dart";
 import "package:think_simple/home/home.dart";
-import "package:think_simple/home/selected_note_notifier.dart";
+import "package:think_simple/home/main_view/history_notifier.dart";
 
 //TODO: Add possibility to backup the database to google drive.
 //? Add a restore button as well. ( which adds to the already existing entries - doesn't remove the non existing ones)
@@ -16,36 +16,26 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final IsarNotifier isarNotifier = IsarNotifier(
-    isarFuture: getApplicationDocumentsDirectory().then(
-      (Directory workingDirectory) async => await Isar.open(
-        <CollectionSchema<Object>>[DatabasePageSchema, NoteSchema],
+    isarFuture: getApplicationDocumentsDirectory()
+        .then((Directory workingDirectory) async {
+      await Directory("${workingDirectory.path}/think_simple/data").create(
+        recursive: true,
+      );
+      return await Isar.open(
+        <CollectionSchema<Object>>[NoteSchema],
         directory: "${workingDirectory.path}/think_simple/data",
-      ),
+      );
+    }),
+  );
+  await isarNotifier.initialize();
+  final HistoryNotifier historyNotifier = HistoryNotifier(
+    historyStack: await isarNotifier.getSnapshots(
+      pageId: isarNotifier.currentNote.pageId,
     ),
   );
-
-  final SelectedNoteNotifer selectedNoteNotifer =
-      await (await isarNotifier.isarFuture)
-          .notes
-          .where()
-          .sortByModifiedDateDesc()
-          .findFirst()
-          .then((Note? value) async {
-    Note? note = value;
-    if (note == null) {
-      final Note newNote = Note(textContent: "", modifiedDate: DateTime.now());
-      final Id noteId =
-          await (await isarNotifier.isarFuture).notes.put(newNote);
-      note = newNote.copyWith(id: noteId);
-    }
-    return note;
-  }).then(
-    (Note note) => SelectedNoteNotifer(selectedNote: note),
-  );
-
   runApp(
     MyApp(
-      selectedNoteNotifer: selectedNoteNotifer,
+      historyNotifier: historyNotifier,
       isarNotifer: isarNotifier,
     ),
   );
@@ -54,12 +44,12 @@ void main() async {
 class MyApp extends StatelessWidget {
   MyApp({
     required this.isarNotifer,
-    required this.selectedNoteNotifer,
+    required this.historyNotifier,
     super.key,
   });
 
   final IsarNotifier isarNotifer;
-  final SelectedNoteNotifer selectedNoteNotifer;
+  final HistoryNotifier historyNotifier;
 
   @override
   Widget build(BuildContext context) {
@@ -69,8 +59,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<IsarNotifier>(
           create: (BuildContext context) => isarNotifer,
         ),
-        ChangeNotifierProvider<SelectedNoteNotifer>(
-          create: (BuildContext context) => selectedNoteNotifer,
+        ChangeNotifierProvider<HistoryNotifier>(
+          create: (BuildContext context) => historyNotifier,
         ),
       ],
       child: MaterialApp(
