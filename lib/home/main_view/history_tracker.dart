@@ -1,14 +1,11 @@
 import "dart:async";
 
 import "package:flutter/material.dart";
-import "package:think_simple/core/database/database_items.dart";
 import "package:think_simple/core/database/isar_notifier.dart";
 import "package:think_simple/core/extensions/string_difference_comparison.dart";
 import "package:think_simple/home/main_view/history_notifier.dart";
 
 class HistoryTracker extends StatefulWidget {
-  //TODO history tracker gets the notes with the same pageId
-
   const HistoryTracker({
     required this.child,
     required this.historyController,
@@ -23,28 +20,6 @@ class HistoryTracker extends StatefulWidget {
   final HistoryNotifier historyController;
   final IsarNotifier isarNotifier;
 
-  static Future<void> saveSnapshot({
-    required Note note,
-    required HistoryNotifier historyController,
-    required IsarNotifier isarNotifier,
-  }) async {
-    if (historyController.historyStack.firstOrNull?.textContent !=
-        note.textContent) {
-      historyController.addToHistoryStack(
-        Note(
-          textContent: note.textContent,
-          modifiedDate: DateTime.now(),
-          wasAutoSaved: true,
-          pageId: note.pageId,
-        ),
-      );
-      await isarNotifier.createSnapshot(
-        textContent: note.textContent,
-        wasAutoSaved: true,
-      );
-    }
-  }
-
   @override
   State<HistoryTracker> createState() => _HistoryTrackerState();
 }
@@ -56,93 +31,44 @@ class _HistoryTrackerState extends State<HistoryTracker> {
   void initState() {
     super.initState();
 
-    textEditingController.text = widget.isarNotifier.currentNote.textContent;
+    textEditingController.text =
+        widget.isarNotifier.availablePages.firstOrNull!.textContent;
 
-    // widget.isarNotifier.addListener(() async {
-    //   // textEditingController.text = widget.isarNotifier.currentNote.textContent;
-
-    //   print("Added new note");
-    // });
-
-    widget.historyController.addListener(() {
-      //!! Only triggers if canUndo or canRedo changes
-      //!! NOT when there is a new history entry.
-      //TODO Unfinished ( haven't given it a look. It is in a working state 11-05-2024 )
-      final String? currentTextOnHistoryStack =
-          widget.historyController.currentTextContent;
-      if (currentTextOnHistoryStack == null) {
-        textEditingController.text = "";
-      } else if (currentTextOnHistoryStack != textEditingController.text) {
-        textEditingController.text = currentTextOnHistoryStack;
-      }
-    });
+    widget.historyController.addListener(
+      () {
+        textEditingController.text =
+            widget.historyController.currentNote.textContent;
+      },
+    );
 
     //TODO disable normal CTRL + Z? and trigger our own Undos.
     textEditingController.addListener(() async {
       final String textOnTrigger = textEditingController.text;
-
-      // if (currentIndex != 0 && textOnTrigger != currentTextContent) {
-      //   setState(() {
-      //     currentIndex = 0;
-      //     historyStack.removeRange(0, currentIndex);
-      //   });
-      // }
+      final int pageIdOnTrigger = widget.historyController.currentPageId;
 
       if (textOnTrigger.isNoticablyDifferentThan(
-        widget.historyController.currentTextContent ?? "",
+        widget.historyController.currentNote.textContent,
       )) {
-        await HistoryTracker.saveSnapshot(
+        await widget.historyController.addToHistoryStack(
           isarNotifier: widget.isarNotifier,
-          historyController: widget.historyController,
-          note: widget.isarNotifier.currentNote.copyWith(
-            textContent: textEditingController.text,
-          ),
+          pageId: pageIdOnTrigger,
+          textContent: textOnTrigger,
         );
       }
 
       await Future<void>.delayed(const Duration(seconds: 3)).then(
         (_) async {
-          if (textOnTrigger == textEditingController.text) {
-            await HistoryTracker.saveSnapshot(
+          //TODO: Fix this. This fires multiple times when typing. ( if you undo slowly and then undo more and more you will get automatically continous insertions )
+          if (textOnTrigger == textEditingController.text &&
+              widget.historyController.currentPageId == pageIdOnTrigger) {
+            await widget.historyController.addToHistoryStack(
               isarNotifier: widget.isarNotifier,
-              historyController: widget.historyController,
-              note: widget.isarNotifier.currentNote.copyWith(
-                textContent: textOnTrigger,
-              ),
+              pageId: pageIdOnTrigger,
+              textContent: textOnTrigger,
             );
           }
         },
       );
-
-      // });
-
-      // historyController.onRedo.addListener(() {
-      //   setState(() {
-      //     if (currentIndex > 0) {
-      //       currentIndex--;
-      //     }
-      //   });
-      //   Future.delayed(Durations.short3).then((_) {
-      //     if (textEditingController.text != currentTextContent) {
-      //       setState(() {
-      //         historyStack[currentIndex] = textEditingController.text;
-      //       });
-      //     }
-      //   });
-      // });
-      // historyController.onUndo.addListener(() {
-      //   setState(() {
-      //     if (currentIndex + 1 < historyStack.length) {
-      //       currentIndex++;
-      //     }
-      //   });
-      //   Future.delayed(Durations.short3).then((_) {
-      //     if (textEditingController.text != currentTextContent) {
-      //       setState(() {
-      //         historyStack[currentIndex] = textEditingController.text;
-      //       });
-      //     }
-      //   });
     });
   }
 
@@ -153,5 +79,3 @@ class _HistoryTrackerState extends State<HistoryTracker> {
     return widget.child(textEditingController);
   }
 }
-
-//TODO !!! UNFIN

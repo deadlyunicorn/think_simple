@@ -2,14 +2,11 @@ import "package:flutter/material.dart";
 import "package:provider/provider.dart";
 import "package:think_simple/core/database/database_items.dart";
 import "package:think_simple/core/database/isar_notifier.dart";
+import "package:think_simple/core/errors/exceptions.dart";
 import "package:think_simple/core/extensions/date_format.dart";
 import "package:think_simple/core/widgets/column_with_spacings.dart";
 import "package:think_simple/core/widgets/custom_alert_dialog.dart";
 import "package:think_simple/home/main_view/history_notifier.dart";
-import "package:think_simple/home/main_view/history_tracker.dart";
-
-//TODO holding on an entry gets progressivelly more and more red
-//TODO and finally there is a confirmation dialog asking to delete the entry.
 
 class LeftSideBar extends StatelessWidget {
   const LeftSideBar({
@@ -45,7 +42,7 @@ class LeftSideBar extends StatelessWidget {
                       builder: (BuildContext context) => CustomAlertDialog(
                         confirmButtonAction: () async {
                           await context.read<IsarNotifier>().deletePage(
-                                noteFromList,
+                                pageId: noteFromList.pageId,
                               );
                           if (context.mounted) {
                             Navigator.of(context).popUntil(
@@ -61,28 +58,32 @@ class LeftSideBar extends StatelessWidget {
                     );
                   },
                   onTap: () async {
+                    if (noteFromList.pageId ==
+                        context.read<HistoryNotifier>().currentPageId) {
+                      return;
+                    }
                     final IsarNotifier isarNotifer =
                         context.read<IsarNotifier>();
-                    await HistoryTracker.saveSnapshot(
-                      isarNotifier: isarNotifer,
-                      historyController: context.read<HistoryNotifier>(),
-                      note: isarNotifer.currentNote.copyWith(
-                        textContent: textEditingController.text,
-                      ),
-                    );
-                    await isarNotifer.setCurrentNote(
-                      newNote: noteFromList,
-                      wasAutoSaved: true,
-                    );
 
+                    final List<Note> snapshots = await isarNotifer.getSnapshots(
+                      autoSavedSnapshots: true,
+                      pageId: noteFromList.pageId,
+                    );
                     if (context.mounted) {
-                      final List<Note> snapshots = await context
-                          .read<IsarNotifier>()
-                          .getSnapshots(pageId: noteFromList.pageId);
-                      if (context.mounted) {
-                        context.read<HistoryNotifier>().handleNewPageSelect(
-                              historyStack: snapshots,
+                      try {
+                        await context.read<HistoryNotifier>().handlePageSelect(
+                              previousTextContent: textEditingController.text,
+                              newPageId: noteFromList.pageId,
+                              newHistoryStack: snapshots,
+                              isarNotifier: isarNotifer,
                             );
+                      } on PageChangedException {
+                        if (context.mounted) {
+                          textEditingController.text = context
+                              .read<HistoryNotifier>()
+                              .currentNote
+                              .textContent;
+                        }
                       }
                     }
                     setLeftBarIsOpen(false);

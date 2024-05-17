@@ -29,8 +29,10 @@ void main() async {
   );
   await isarNotifier.initialize();
   final HistoryNotifier historyNotifier = HistoryNotifier(
-    historyStack: await isarNotifier.getSnapshots(
-      pageId: isarNotifier.currentNote.pageId,
+    pageId: isarNotifier.availablePages.first.pageId,
+    autoSavedHistoryStack: await isarNotifier.getSnapshots(
+      pageId: isarNotifier.availablePages.first.pageId,
+      autoSavedSnapshots: true,
     ),
   );
   runApp(

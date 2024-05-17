@@ -2,9 +2,9 @@ import "package:flutter/material.dart";
 import "package:provider/provider.dart";
 import "package:think_simple/core/database/database_items.dart";
 import "package:think_simple/core/database/isar_notifier.dart";
+import "package:think_simple/core/errors/exceptions.dart";
 import "package:think_simple/core/widgets/animated_icon_change_rotation.dart";
 import "package:think_simple/home/main_view/history_notifier.dart";
-import "package:think_simple/home/main_view/history_tracker.dart";
 
 class CreateNewNoteButton extends StatelessWidget {
   const CreateNewNoteButton({
@@ -27,26 +27,20 @@ class CreateNewNoteButton extends StatelessWidget {
         child: const Icon(Icons.add),
         onPressed: () async {
           final IsarNotifier isarNotifier = context.read<IsarNotifier>();
-          final HistoryNotifier historyController =
-              context.read<HistoryNotifier>();
-          await HistoryTracker.saveSnapshot(
-            isarNotifier: isarNotifier,
-            historyController: historyController,
-            note: Note(
-              textContent: textEditingController.text,
-              modifiedDate: DateTime.now(),
-              wasAutoSaved: true,
-              pageId: isarNotifier.currentNote.pageId,
-            ),
-          );
-          if (context.mounted) {
-            await context.read<IsarNotifier>().createNewPage();
-          }
+          final Note newPage =
+              await context.read<IsarNotifier>().createNewPage();
 
           if (context.mounted) {
-            context.read<HistoryNotifier>().handleNewPageSelect(
-              historyStack: <Note>[],
-            );
+            try {
+              await context.read<HistoryNotifier>().handlePageSelect(
+                isarNotifier: isarNotifier,
+                newPageId: newPage.id,
+                previousTextContent: textEditingController.text,
+                newHistoryStack: <Note>[newPage],
+              );
+            } on PageChangedException {
+              textEditingController.text = newPage.textContent;
+            }
           }
         },
       ),

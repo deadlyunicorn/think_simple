@@ -2,7 +2,7 @@ import "dart:ui";
 
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
-import "package:think_simple/core/database/isar_notifier.dart";
+import "package:think_simple/home/main_view/history_notifier.dart";
 import "package:think_simple/home/main_view/main_view.dart";
 import "package:think_simple/home/main_view/top_bar/buttons/access_left_sidebar_button.dart";
 import "package:think_simple/home/main_view/top_bar/buttons/date_edited.dart";
@@ -72,7 +72,7 @@ class TopBar extends StatelessWidget {
                         ),
                         DateEdited(
                           dateEdited: context
-                              .watch<IsarNotifier>()
+                              .watch<HistoryNotifier>()
                               .currentNote
                               .modifiedDate,
                         ),

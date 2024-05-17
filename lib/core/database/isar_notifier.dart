@@ -4,18 +4,10 @@ import "package:think_simple/core/database/database_items.dart";
 
 class IsarNotifier extends ChangeNotifier {
   final Future<Isar> isarFuture;
+  IsarNotifier({required this.isarFuture});
 
-  late Note _currentNote;
   List<Note> _availablePages = <Note>[];
 
-  Future<void> runWriteOperation({
-    required Future<void> Function() writeOperation,
-  }) async {
-    await writeOperation();
-    notifyListeners();
-  }
-
-  Note get currentNote => _currentNote;
   List<Note> get availablePages => _availablePages;
 
   Future<Note> createNewPage() async {
@@ -35,114 +27,65 @@ class IsarNotifier extends ChangeNotifier {
       return initialNote.copyWith(id: noteId);
     });
     _availablePages = await getAvailablePages();
-    await setCurrentNote(
-      newNote: newNote,
-      wasAutoSaved: true,
-    );
-    print(newNote.textContent);
-    print(_currentNote.textContent);
     notifyListeners();
     return newNote;
   }
 
-  Future<void> deletePage(Note noteOfPage) async {
+  Future<void> deletePage({
+    required int pageId,
+  }) async {
     final Isar isar = await isarFuture;
 
     await isar.writeTxn(
       () async {
-        //TODO !!! add a method on IsarNotifer
         //? that also deletes all the related Notes.
-        await isar.notes.filter().pageIdEqualTo(noteOfPage.pageId).deleteAll();
+        await isar.notes.filter().pageIdEqualTo(pageId).deleteAll();
       },
     );
 
     _availablePages = await getAvailablePages();
-    if (_availablePages.isEmpty) {
-      await setCurrentNote(
-        newNote: await createNewPage(),
-        wasAutoSaved: true,
-      );
-    }
-  }
-
-  Future<void> initialize() async {
-    final Isar isar = (await isarFuture);
-    _currentNote = await isar.notes
-        .where()
-        .sortByModifiedDateDesc()
-        .findFirst()
-        .then((Note? note) async {
-      if (note == null) {
-        return await createNewPage();
-      } else {
-        return note;
-      }
-    });
-    _availablePages = await getAvailablePages();
-  }
-
-  Future<void> setCurrentNote({
-    required Note newNote,
-    required bool wasAutoSaved,
-  }) async {
-    await createSnapshot(
-      textContent: _currentNote.textContent,
-      wasAutoSaved: wasAutoSaved,
-    );
-    _currentNote = newNote;
     notifyListeners();
-  }
-
-  Future<List<Note>> getAvailablePages() async {
-    return await (await isarFuture)
-        .notes
-        .where()
-        .sortByModifiedDateDesc()
-        .distinctByPageId()
-        .findAll();
   }
 
   Future<Note> createSnapshot({
     required String textContent,
+    required int pageId,
     required bool wasAutoSaved,
   }) async {
-    if (_currentNote.textContent == textContent) return currentNote;
     final Isar isar = await isarFuture;
+
+    final List<Note> snapshots = await isar.notes
+        .filter()
+        .pageIdEqualTo(pageId)
+        .wasAutoSavedEqualTo(wasAutoSaved)
+        .sortByModifiedDateDesc()
+        .findAll();
+    if (snapshots.firstOrNull?.textContent == textContent) {
+      return snapshots.first;
+    }
+
     final DateTime modificationDate = DateTime.now();
-    final Note newNote = Note(
+    final Note noteToSnapshot = Note(
       textContent: textContent,
       modifiedDate: modificationDate,
       wasAutoSaved: wasAutoSaved,
-      pageId: _currentNote.pageId,
+      pageId: pageId,
     );
     final Id id = await isar.writeTxn(() async {
       return await isar.notes.put(
-        newNote,
+        noteToSnapshot,
       );
     });
 
-    await setCurrentNote(
-      newNote: newNote.copyWith(id: id),
-      wasAutoSaved: wasAutoSaved,
-    );
-
-    if (wasAutoSaved) {
-      final List<Note> snapshots = await isar.notes
-          .filter()
-          .pageIdEqualTo(_currentNote.pageId)
-          .wasAutoSavedEqualTo(true)
-          .sortByModifiedDateDesc()
-          .findAll();
-      if (snapshots.length > 10) {
-        final List<Note> snapshotsToDelete = snapshots..removeRange(0, 10);
-        await isar.writeTxn(
-          () async {
-            await isar.notes.deleteAll(
-              snapshotsToDelete.map((Note note) => note.id).toList(),
-            );
-          },
-        );
-      }
+    if (wasAutoSaved && snapshots.length > 10) {
+      final List<Note> snapshotsToDelete = snapshots..removeRange(0, 9);
+      await isar.writeTxn(
+        () async {
+          await isar.notes.deleteAll(
+            snapshotsToDelete.map((Note note) => note.id).toList(),
+          );
+        },
+      );
     }
 
     _availablePages = await getAvailablePages();
@@ -153,21 +96,66 @@ class IsarNotifier extends ChangeNotifier {
       textContent: textContent,
       modifiedDate: modificationDate,
       wasAutoSaved: wasAutoSaved,
-      pageId: _currentNote.pageId,
+      pageId: pageId,
       id: id,
     );
   }
 
-  IsarNotifier({required this.isarFuture});
-
   Future<List<Note>> getSnapshots({
     required int pageId,
+    required bool autoSavedSnapshots,
   }) async {
     final Isar isar = await isarFuture;
     return await isar.notes
         .filter()
         .pageIdEqualTo(pageId)
+        .wasAutoSavedEqualTo(autoSavedSnapshots)
         .sortByModifiedDateDesc()
         .findAll();
+  }
+
+  Future<void> setAutoSavedSnapshots({
+    required int pageId,
+    required List<Note> newAutoSavedSnapshotList,
+  }) async {
+    final Isar isar = await isarFuture;
+
+    await isar.writeTxn(
+      () async {
+        await isar.notes.filter().pageIdEqualTo(pageId).deleteAll();
+        await isar.notes.putAll(newAutoSavedSnapshotList);
+      },
+    );
+    _availablePages = await getAvailablePages();
+    notifyListeners();
+  }
+
+  Future<void> deleteSnapshot({
+    required int noteId,
+  }) async {
+    final Isar isar = await isarFuture;
+    await isar.writeTxn(() async {
+      await isar.notes.delete(noteId);
+    });
+    notifyListeners();
+  }
+
+  Future<List<Note>> getAvailablePages() async {
+    List<Note> availablePages = await (await isarFuture)
+        .notes
+        .where()
+        .sortByModifiedDateDesc()
+        .distinctByPageId()
+        .findAll();
+    if (availablePages.isEmpty) {
+      availablePages = <Note>[await createNewPage()];
+    }
+
+    _availablePages = availablePages;
+    return availablePages;
+  }
+
+  Future<void> initialize() async {
+    _availablePages = await getAvailablePages();
   }
 }
