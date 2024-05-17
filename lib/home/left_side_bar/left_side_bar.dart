@@ -1,25 +1,27 @@
 import "package:flutter/material.dart";
-import "package:isar/isar.dart";
 import "package:provider/provider.dart";
 import "package:think_simple/core/database/database_items.dart";
 import "package:think_simple/core/database/isar_notifier.dart";
 import "package:think_simple/core/extensions/date_format.dart";
 import "package:think_simple/core/widgets/column_with_spacings.dart";
 import "package:think_simple/core/widgets/custom_alert_dialog.dart";
-import "package:think_simple/home/selected_note_notifier.dart";
+import "package:think_simple/home/main_view/history_notifier.dart";
+import "package:think_simple/home/main_view/history_tracker.dart";
 
 //TODO holding on an entry gets progressivelly more and more red
 //TODO and finally there is a confirmation dialog asking to delete the entry.
 
 class LeftSideBar extends StatelessWidget {
   const LeftSideBar({
-    required this.pages,
+    required this.availablePages,
     required this.setLeftBarIsOpen,
+    required this.textEditingController,
     super.key,
   });
 
-  final List<CompletePage> pages;
+  final List<Note> availablePages;
   final void Function(bool) setLeftBarIsOpen;
+  final TextEditingController textEditingController;
 
   @override
   Widget build(BuildContext context) {
@@ -29,43 +31,22 @@ class LeftSideBar extends StatelessWidget {
     return Container(
       height: double.infinity,
       color: Theme.of(context).colorScheme.primary.withOpacity(0.02),
-      child: pages.isNotEmpty
+      child: availablePages.isNotEmpty
           ? ListView.builder(
               padding: const EdgeInsets.symmetric(
                 vertical: 32.0,
               ),
               itemBuilder: (BuildContext context, int index) {
-                final Note currentNote = pages[index].currentNote;
+                final Note noteFromList = availablePages[index];
                 return ListTile(
                   onLongPress: () {
-                    final SelectedNoteNotifer selectedNoteNotefier =
-                        context.read<SelectedNoteNotifer>();
                     showDialog(
                       context: context,
                       builder: (BuildContext context) => CustomAlertDialog(
                         confirmButtonAction: () async {
-                          final IsarNotifier isarNotifier =
-                              context.read<IsarNotifier>();
-                          final Isar isar = await isarNotifier.isarFuture;
-
-                          await isarNotifier.runWriteOperation(
-                            writeOperation: () async {
-                              await isar.writeTxn(
-                                () async {
-                                  //TODO !!! add a method on IsarNotifer
-                                  //? that also deletes all the related Notes.
-                                  if (await isar.databasePages.delete(
-                                    pages[index].currentPage.id,
-                                  )) {
-                                    if (context.mounted) {
-                                      selectedNoteNotefier.updateNote(null);
-                                    }
-                                  }
-                                },
+                          await context.read<IsarNotifier>().deletePage(
+                                noteFromList,
                               );
-                            },
-                          );
-
                           if (context.mounted) {
                             Navigator.of(context).popUntil(
                               (Route<void> route) => route.isFirst,
@@ -79,16 +60,39 @@ class LeftSideBar extends StatelessWidget {
                       ),
                     );
                   },
-                  onTap: () {
-                    context.read<SelectedNoteNotifer>().updateNote(currentNote);
+                  onTap: () async {
+                    final IsarNotifier isarNotifer =
+                        context.read<IsarNotifier>();
+                    await HistoryTracker.saveSnapshot(
+                      isarNotifier: isarNotifer,
+                      historyController: context.read<HistoryNotifier>(),
+                      note: isarNotifer.currentNote.copyWith(
+                        textContent: textEditingController.text,
+                      ),
+                    );
+                    await isarNotifer.setCurrentNote(
+                      newNote: noteFromList,
+                      wasAutoSaved: true,
+                    );
+
+                    if (context.mounted) {
+                      final List<Note> snapshots = await context
+                          .read<IsarNotifier>()
+                          .getSnapshots(pageId: noteFromList.pageId);
+                      if (context.mounted) {
+                        context.read<HistoryNotifier>().handleNewPageSelect(
+                              historyStack: snapshots,
+                            );
+                      }
+                    }
                     setLeftBarIsOpen(false);
                   },
                   title: ColumnWithSpacings(
                     spacing: 8,
                     children: <Widget>[
                       Text(
-                        currentNote.textContent.isNotEmpty
-                            ? currentNote.textContent
+                        noteFromList.textContent.isNotEmpty
+                            ? noteFromList.textContent
                             : "Empty Note.",
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -98,7 +102,7 @@ class LeftSideBar extends StatelessWidget {
                       Align(
                         alignment: Alignment.centerRight,
                         child: Text(
-                          currentNote.modifiedDate.formatted,
+                          noteFromList.modifiedDate.formatted,
                           style: Theme.of(context).textTheme.bodySmall,
                           textAlign: TextAlign.right,
                           maxLines: 1,
@@ -109,7 +113,7 @@ class LeftSideBar extends StatelessWidget {
                   ),
                 );
               },
-              itemCount: pages.length,
+              itemCount: availablePages.length,
             )
           : const Center(
               child: Text("No notes found"),
