@@ -69,8 +69,6 @@ class _MainViewState extends State<MainView> {
     }
   }
 
-  //TODO: create a function that checks for how many different characters the text has
-  //TODO compared to the previous snapshot. If it has more than 20 characters then create a new snapshot
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -100,7 +98,6 @@ class _MainViewState extends State<MainView> {
                             : 0,
                       ),
                       TextField(
-                        //? Make CTRL Z, CTRL + Y button use our custom controller.
                         onTap: () {
                           widget.setLeftBarIsOpen(false);
                         },

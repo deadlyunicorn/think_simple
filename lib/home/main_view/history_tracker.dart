@@ -41,7 +41,6 @@ class _HistoryTrackerState extends State<HistoryTracker> {
       },
     );
 
-    //TODO disable normal CTRL + Z? and trigger our own Undos.
     textEditingController.addListener(() async {
       final String textOnTrigger = textEditingController.text;
       final int pageIdOnTrigger = widget.historyController.currentPageId;
@@ -58,7 +57,11 @@ class _HistoryTrackerState extends State<HistoryTracker> {
 
       await Future<void>.delayed(const Duration(seconds: 3)).then(
         (_) async {
-          //TODO: Fix this. This fires multiple times when typing. ( if you undo slowly and then undo more and more you will get automatically continous insertions )
+          //TODO: Fix this. This fires multiple times when typing.
+          //?( if you undo slowly and then undo more and more
+          //? you will get automatically continous insertions )
+          //TODO: add a *Saved* indicator.
+
           if (textOnTrigger == textEditingController.text &&
               widget.historyController.currentPageId == pageIdOnTrigger) {
             await widget.historyController.addToHistoryStack(

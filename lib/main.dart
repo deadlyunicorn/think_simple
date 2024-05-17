@@ -10,7 +10,8 @@ import "package:think_simple/home/home.dart";
 import "package:think_simple/home/main_view/history_notifier.dart";
 
 //TODO: Add possibility to backup the database to google drive.
-//? Add a restore button as well. ( which adds to the already existing entries - doesn't remove the non existing ones)
+//? Add a restore button as well. ( which adds to the already existing entries
+//? - doesn't remove the non existing ones)
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

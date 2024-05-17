@@ -55,7 +55,6 @@ class TopBar extends StatelessWidget {
                         .background
                         .withOpacity(0.8),
                   ),
-                  //TODO Search for mask filter blur
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 32.0,
