@@ -26,6 +26,7 @@ class HistoryTracker extends StatefulWidget {
 
 class _HistoryTrackerState extends State<HistoryTracker> {
   final TextEditingController textEditingController = TextEditingController();
+  bool timeoutIsRunning = false;
 
   @override
   void initState() {
@@ -55,23 +56,13 @@ class _HistoryTrackerState extends State<HistoryTracker> {
         );
       }
 
-      await Future<void>.delayed(const Duration(seconds: 3)).then(
-        (_) async {
-          //TODO: Fix this. This fires multiple times when typing.
-          //?( if you undo slowly and then undo more and more
-          //? you will get automatically continous insertions )
-          //TODO: add a *Saved* indicator.
-
-          if (textOnTrigger == textEditingController.text &&
-              widget.historyController.currentPageId == pageIdOnTrigger) {
-            await widget.historyController.addToHistoryStack(
-              isarNotifier: widget.isarNotifier,
-              pageId: pageIdOnTrigger,
-              textContent: textOnTrigger,
-            );
-          }
-        },
-      );
+      if (!timeoutIsRunning) {
+        timeoutIsRunning = true;
+        await runTimerForAutosave(
+          pageIdOnTrigger: pageIdOnTrigger,
+          textOnTrigger: textOnTrigger,
+        );
+      }
     });
   }
 
@@ -80,5 +71,31 @@ class _HistoryTrackerState extends State<HistoryTracker> {
     // print("Index: $currentIndex, item: $currentTextContent");
     // print(historyStack);
     return widget.child(textEditingController);
+  }
+
+  Future<void> runTimerForAutosave({
+    required String textOnTrigger,
+    required int pageIdOnTrigger,
+  }) async {
+    return await Future<void>.delayed(const Duration(seconds: 3)).then(
+      (_) async {
+        final String currentText = textEditingController.text;
+        final int currentPageId = widget.historyController.currentPageId;
+
+        if (textOnTrigger == currentText && currentPageId == pageIdOnTrigger) {
+          await widget.historyController.addToHistoryStack(
+            isarNotifier: widget.isarNotifier,
+            pageId: pageIdOnTrigger,
+            textContent: textOnTrigger,
+          );
+          timeoutIsRunning = false;
+        } else {
+          await runTimerForAutosave(
+            textOnTrigger: currentText,
+            pageIdOnTrigger: currentPageId,
+          );
+        }
+      },
+    );
   }
 }
