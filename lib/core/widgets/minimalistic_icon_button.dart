@@ -14,18 +14,18 @@ class MinimalisticIconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       style: ButtonStyle(
-        foregroundColor: MaterialStateColor.resolveWith(
-          (Set<MaterialState> states) {
-            if (states.contains(MaterialState.hovered) ||
-                states.contains(MaterialState.pressed)) {
+        foregroundColor: WidgetStateColor.resolveWith(
+          (Set<WidgetState> states) {
+            if (states.contains(WidgetState.hovered) ||
+                states.contains(WidgetState.pressed)) {
               return Colors.white;
             }
-            return Theme.of(context).colorScheme.onBackground;
+            return Theme.of(context).colorScheme.onSurface;
           },
         ),
-        overlayColor: MaterialStateColor.resolveWith(
-          (Set<MaterialState> states) {
-            if (states.contains(MaterialState.pressed)) {
+        overlayColor: WidgetStateColor.resolveWith(
+          (Set<WidgetState> states) {
+            if (states.contains(WidgetState.pressed)) {
               return Colors.white.withAlpha(48);
             }
             return Colors.transparent;

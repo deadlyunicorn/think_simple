@@ -79,7 +79,7 @@ class MyApp extends StatelessWidget {
   static const Color _primary = Color(0xFF3B197B);
   static const Color _secondary = Color(0xFF2619B4);
   static const Color _tetriary = Color.fromARGB(255, 13, 181, 97);
-  static const Color _background = Color(0xFF040412);
+  static const Color _surface = Color(0xFF040412);
   static const Color _error = Color.fromARGB(255, 199, 11, 68);
 
   final ThemeData darkTheme = ThemeData(
@@ -91,9 +91,8 @@ class MyApp extends StatelessWidget {
       onSecondary: _white,
       error: _error,
       onError: _white,
-      background: _background,
-      onBackground: _white,
-      surface: _tetriary,
+      tertiary: _tetriary,
+      surface: _surface,
       onSurface: _white,
     ),
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
@@ -101,7 +100,7 @@ class MyApp extends StatelessWidget {
       foregroundColor: _white,
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      backgroundColor: _background,
+      backgroundColor: _surface,
       selectedItemColor: _tetriary,
     ),
     textTheme: const TextTheme(
@@ -156,15 +155,15 @@ class MyApp extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(8)),
       ),
-      backgroundColor: _background,
+      backgroundColor: _surface,
       dividerColor: Colors.transparent,
       todayBorder: BorderSide(style: BorderStyle.none),
-      todayForegroundColor: MaterialStatePropertyAll<Color>(_tetriary),
+      todayForegroundColor: WidgetStatePropertyAll<Color>(_tetriary),
     ),
     dropdownMenuTheme: DropdownMenuThemeData(
       menuStyle: MenuStyle(
-        backgroundColor: MaterialStatePropertyAll<Color>(
-          _background.withOpacity(0.94),
+        backgroundColor: WidgetStatePropertyAll<Color>(
+          _surface.withOpacity(0.94),
         ),
       ),
     ),
@@ -179,18 +178,18 @@ class MyApp extends StatelessWidget {
         foregroundColor: _tetriary,
         backgroundColor: _secondary.withAlpha(64),
       ).copyWith(
-        overlayColor: MaterialStatePropertyAll<Color>(_secondary.withAlpha(64)),
+        overlayColor: WidgetStatePropertyAll<Color>(_secondary.withAlpha(64)),
       ),
     ),
     menuBarTheme: const MenuBarThemeData(
       style: MenuStyle(
-        backgroundColor: MaterialStatePropertyAll<Color>(_background),
-        padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.zero),
+        backgroundColor: WidgetStatePropertyAll<Color>(_surface),
+        padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.zero),
       ),
     ),
     menuTheme: const MenuThemeData(
       style: MenuStyle(
-        backgroundColor: MaterialStatePropertyAll<Color>(Colors.transparent),
+        backgroundColor: WidgetStatePropertyAll<Color>(Colors.transparent),
       ),
     ),
     iconButtonTheme: IconButtonThemeData(

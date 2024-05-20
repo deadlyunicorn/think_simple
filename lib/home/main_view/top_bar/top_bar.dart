@@ -50,10 +50,8 @@ class TopBar extends StatelessWidget {
                 child: Container(
                   height: MainView.topBarHeight,
                   decoration: BoxDecoration(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .background
-                        .withOpacity(0.8),
+                    color:
+                        Theme.of(context).colorScheme.surface.withOpacity(0.8),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(

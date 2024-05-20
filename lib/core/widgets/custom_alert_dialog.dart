@@ -44,7 +44,7 @@ class CustomAlertDialog extends StatelessWidget {
                   TextButton(
                     style: ButtonStyle(
                       mouseCursor: mouseCursor != null
-                          ? MaterialStatePropertyAll<MouseCursor>(
+                          ? WidgetStatePropertyAll<MouseCursor>(
                               mouseCursor!,
                             )
                           : null,
