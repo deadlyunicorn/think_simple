@@ -37,8 +37,11 @@ class _HistoryTrackerState extends State<HistoryTracker> {
 
     widget.historyController.addListener(
       () {
-        textEditingController.text =
-            widget.historyController.currentNote.textContent;
+        if (textEditingController.text !=
+            widget.historyController.currentNote.textContent) {
+          textEditingController.text =
+              widget.historyController.currentNote.textContent;
+        }
       },
     );
 
