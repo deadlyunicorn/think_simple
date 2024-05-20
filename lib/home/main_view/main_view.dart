@@ -98,9 +98,10 @@ class _MainViewState extends State<MainView> {
                             : 0,
                       ),
                       TextField(
-                        onTap: () {
-                          widget.setLeftBarIsOpen(false);
-                        },
+                        //? subjective really..
+                        // onTap: () {
+                        //   widget.setLeftBarIsOpen(false);
+                        // },
                         controller: widget.textEditingController,
                         minLines: 32,
                         autofocus: true,

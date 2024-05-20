@@ -27,7 +27,7 @@ class LeftSideBar extends StatelessWidget {
 
     return Container(
       height: double.infinity,
-      color: Theme.of(context).colorScheme.primary.withOpacity(0.02),
+      color: Theme.of(context).colorScheme.primary.withOpacity(0.06),
       child: availablePages.isNotEmpty
           ? ListView.builder(
               padding: const EdgeInsets.symmetric(
@@ -91,14 +91,18 @@ class LeftSideBar extends StatelessWidget {
                   title: ColumnWithSpacings(
                     spacing: 8,
                     children: <Widget>[
-                      Text(
-                        noteFromList.textContent.isNotEmpty
-                            ? noteFromList.textContent
-                            : "Empty Note.",
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        // ,
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          noteFromList.textContent.isNotEmpty
+                              ? noteFromList.textContent
+                              : "Empty Note.",
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          textAlign: TextAlign.start,
+                          // ,
+                        ),
                       ),
                       Align(
                         alignment: Alignment.centerRight,
