@@ -39,8 +39,16 @@ class _HistoryTrackerState extends State<HistoryTracker> {
       () {
         if (textEditingController.text !=
             widget.historyController.currentNote.textContent) {
+          final TextSelection selectionBeforeChange =
+              textEditingController.selection;
+
           textEditingController.text =
               widget.historyController.currentNote.textContent;
+
+          //? prevents setting the position of the cursor
+          //? to the end of the string.
+
+          textEditingController.selection = selectionBeforeChange;
         }
       },
     );
