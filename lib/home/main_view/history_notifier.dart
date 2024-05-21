@@ -69,9 +69,9 @@ class HistoryNotifier extends ChangeNotifier {
         0,
         snapshot,
       );
+      notifyListeners();
     }
 
-    notifyListeners();
     return _autoSavedHistoryStack;
   }
 

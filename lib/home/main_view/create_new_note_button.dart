@@ -34,7 +34,7 @@ class CreateNewNoteButton extends StatelessWidget {
             try {
               await context.read<HistoryNotifier>().handlePageSelect(
                 isarNotifier: isarNotifier,
-                newPageId: newPage.id,
+                newPageId: newPage.pageId,
                 previousTextContent: textEditingController.text,
                 newHistoryStack: <Note>[newPage],
               );
