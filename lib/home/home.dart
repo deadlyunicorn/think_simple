@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
 import "package:think_simple/core/database/isar_notifier.dart";
@@ -8,18 +10,10 @@ import "package:think_simple/home/main_view/main_view.dart";
 
 //TODO: Manual Snapshots.
 
-class Home extends StatefulWidget {
+class Home extends StatelessWidget {
   const Home({
     super.key,
   });
-
-  @override
-  State<Home> createState() => _HomeState();
-}
-
-class _HomeState extends State<Home> {
-  bool leftBarIsVisible = false;
-  bool _leftBarIsOpen = false;
 
   @override
   Widget build(BuildContext context) {
@@ -30,40 +24,63 @@ class _HomeState extends State<Home> {
         child: (
           TextEditingController textEditingController,
         ) =>
-            SafeArea(
-          child: Row(
-            children: <Widget>[
-              AnimatedContainer(
-                onEnd: () {
-                  if (!leftBarIsVisible) {
-                    setState(() {
-                      _leftBarIsOpen = false;
-                    });
-                  }
-                },
-                duration: const Duration(milliseconds: 80),
-                width: leftBarIsVisible
-                    ? MediaQuery.sizeOf(context).width * 0.36
-                    : 0,
-                child: _leftBarIsOpen
-                    ? LeftSideBar(
-                        textEditingController: textEditingController,
-                        setLeftBarIsOpen: setLeftBarIsOpen,
-                        availablePages:
-                            context.watch<IsarNotifier>().availablePages,
-                      )
-                    : const SizedBox.shrink(),
-              ),
-              Expanded(
-                child: MainView(
-                  textEditingController: textEditingController,
-                  leftBarIsOpen: leftBarIsVisible,
-                  setLeftBarIsOpen: setLeftBarIsOpen,
-                ),
-              ),
-            ],
-          ),
+            HomeView(
+          textEditingController: textEditingController,
         ),
+      ),
+    );
+  }
+}
+
+class HomeView extends StatefulWidget {
+  const HomeView({
+    required this.textEditingController,
+    super.key,
+  });
+
+  final TextEditingController textEditingController;
+
+  @override
+  State<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
+  bool leftBarIsVisible = false;
+  bool _leftBarIsOpen = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Row(
+        children: <Widget>[
+          AnimatedContainer(
+            onEnd: () {
+              if (!leftBarIsVisible) {
+                setState(() {
+                  _leftBarIsOpen = false;
+                });
+              }
+            },
+            duration: const Duration(milliseconds: 80),
+            width:
+                leftBarIsVisible ? MediaQuery.sizeOf(context).width * 0.36 : 0,
+            child: _leftBarIsOpen
+                ? LeftSideBar(
+                    textEditingController: widget.textEditingController,
+                    setLeftBarIsOpen: setLeftBarIsOpen,
+                    availablePages:
+                        context.watch<IsarNotifier>().availablePages,
+                  )
+                : const SizedBox.shrink(),
+          ),
+          Expanded(
+            child: MainView(
+              textEditingController: widget.textEditingController,
+              leftBarIsOpen: leftBarIsVisible,
+              setLeftBarIsOpen: setLeftBarIsOpen,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -75,5 +92,15 @@ class _HomeState extends State<Home> {
         _leftBarIsOpen = true;
       }
     });
+
+    // if (newState) {
+    unawaited(
+      context.read<IsarNotifier>().createSnapshot(
+            textContent: widget.textEditingController.text,
+            pageId: context.read<HistoryNotifier>().currentPageId,
+            wasAutoSaved: true,
+          ),
+    );
+    // }
   }
 }
