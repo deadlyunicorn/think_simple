@@ -45,10 +45,12 @@ class _HistoryTrackerState extends State<HistoryTracker> {
           textEditingController.text =
               widget.historyController.currentNote.textContent;
 
-          //? prevents setting the position of the cursor
-          //? to the end of the string.
-
-          textEditingController.selection = selectionBeforeChange;
+          if (textEditingController.text.isNotEmpty) {
+            //? prevents setting the position of the cursor
+            //? to the end of the string.
+            //? when adding from a place other than the end
+            textEditingController.selection = selectionBeforeChange;
+          }
         }
       },
     );
